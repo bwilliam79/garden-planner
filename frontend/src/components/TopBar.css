@@ -1,0 +1,33 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--green-dark);
+  color: var(--white);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-logo { font-size: 28px; }
+.topbar-title { font-size: 20px; color: var(--white); }
+.topbar-sub { font-size: 12px; opacity: 0.75; }
+
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+.topbar-actions .btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 500;
+  transition: opacity 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.topbar-actions .btn-primary { background: #52b788; color: #fff; }
+.topbar-actions .btn-secondary { background: rgba(255,255,255,0.15); color: #fff; }
+.topbar-actions .btn:hover { opacity: 0.85; }
+.topbar-actions .btn:disabled { opacity: 0.4; cursor: not-allowed; }

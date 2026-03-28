@@ -1,0 +1,85 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green-dark: #2d6a4f;
+  --green-mid: #52b788;
+  --green-light: #d8f3dc;
+  --brown: #7c4f2a;
+  --brown-light: #f0e0cc;
+  --text: #1b1b1b;
+  --text-muted: #666;
+  --border: #ccc;
+  --bg: #f7f5f0;
+  --white: #fff;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+h1, h2, h3 { font-weight: 600; }
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: opacity 0.15s, transform 0.1s;
+}
+button:hover { opacity: 0.85; }
+button:active { transform: scale(0.97); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary { background: var(--green-dark); color: var(--white); }
+.btn-secondary { background: var(--green-light); color: var(--green-dark); }
+.btn-danger { background: #e74c3c; color: var(--white); }
+.btn-brown { background: var(--brown); color: var(--white); }
+
+input, select, textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  background: var(--white);
+  color: var(--text);
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--green-mid);
+  border-color: transparent;
+}
+
+label { font-size: 13px; font-weight: 500; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--green-dark);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--green-light);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--green-light);
+  color: var(--green-dark);
+}

@@ -1,0 +1,76 @@
+.plan-page { display: flex; flex-direction: column; gap: 16px; }
+
+.plan-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 20px;
+  text-align: center;
+}
+.plan-empty-icon { font-size: 48px; }
+.plan-empty h2 { color: var(--green-dark); }
+.plan-empty p { color: var(--text-muted); max-width: 400px; line-height: 1.6; }
+
+.plan-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.plan-header h2 { font-size: 18px; color: var(--green-dark); }
+.plan-meta { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.plan-overview p { line-height: 1.7; color: var(--text); }
+
+.placements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.placement-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--bg);
+}
+.placement-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.placement-name { font-weight: 600; font-size: 15px; color: var(--green-dark); }
+
+.placement-details {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 4px 8px;
+  font-size: 13px;
+}
+.placement-details dt { color: var(--text-muted); font-weight: 500; }
+.placement-details dd { color: var(--text); }
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.schedule-table th, .schedule-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.schedule-table th { background: var(--green-light); color: var(--green-dark); font-weight: 600; }
+.schedule-table tr:last-child td { border-bottom: none; }
+
+.companion-list, .tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 20px;
+}
+.companion-list li, .tips-list li {
+  line-height: 1.6;
+  font-size: 14px;
+}
