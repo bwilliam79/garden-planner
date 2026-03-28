@@ -1,0 +1,20 @@
+.garden-overview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: start;
+}
+
+.overview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.overview-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}

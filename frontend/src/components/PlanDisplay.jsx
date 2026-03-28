@@ -1,6 +1,58 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { draw, CANVAS_SIZE, PLANT_COLORS } from './GardenCanvas.jsx'
 import './PlanDisplay.css'
+
+function ReplacementPanel({ placement, bed, allPlacements, onClose }) {
+  const [loading, setLoading] = useState(false)
+  const [replacements, setReplacements] = useState(null)
+  const [error, setError] = useState(null)
+
+  const fetch_ = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/replace', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deadPlant: placement, bed, allPlacements })
+      })
+      if (!res.ok) throw new Error(await res.text())
+      const data = await res.json()
+      setReplacements(data.replacements)
+    } catch (e) {
+      setError(e.message || 'Failed to get recommendations.')
+    } finally {
+      setLoading(false)
+    }
+  }, [placement, bed, allPlacements])
+
+  useEffect(() => { fetch_() }, [])
+
+  return (
+    <div className="replacement-panel">
+      <div className="replacement-header">
+        <span>🌱 Replacements for <strong>{placement.plant}</strong></span>
+        <button className="close-btn" onClick={onClose}>✕</button>
+      </div>
+      {loading && <p className="replacement-loading">⏳ Getting recommendations…</p>}
+      {error && <p className="replacement-error">{error}</p>}
+      {replacements && (
+        <div className="replacement-list">
+          {replacements.map((r, i) => (
+            <div key={i} className="replacement-item">
+              <div className="replacement-name">🌿 {r.plant}</div>
+              <p className="replacement-reason">{r.reason}</p>
+              <div className="replacement-meta">
+                {r.spacing && <span>Spacing: {r.spacing}</span>}
+                {r.watering && <span>Watering: {r.watering}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function PrintBed({ bed, placements, plan, colorOffset }) {
   const canvasRef = useRef(null)
@@ -63,6 +115,11 @@ function PrintBed({ bed, placements, plan, colorOffset }) {
 }
 
 export default function PlanDisplay({ plan, placements, beds, onGenerate, generating }) {
+  const [deadPlants, setDeadPlants] = useState({}) // key: `bedId-plantName`
+  const [replacing, setReplacing] = useState(null)  // { placement, bed }
+
+  const toggleDead = (key) => setDeadPlants(d => ({ ...d, [key]: !d[key] }))
+
   if (!plan) {
     return (
       <div className="card plan-empty">
@@ -132,21 +189,52 @@ export default function PlanDisplay({ plan, placements, beds, onGenerate, genera
         <div key={bed.id} className="card">
           <div className="section-title">📍 {bed.name} — Plant Placements</div>
           <div className="placements-grid">
-            {bp.map((p, i) => (
-              <div key={i} className="placement-card">
-                <div className="placement-header">
-                  <span className="placement-name">{p.plant}</span>
-                  {p.quantity && <span className="badge">×{p.quantity}</span>}
+            {bp.map((p, i) => {
+              const key = `${bed.id}-${p.plant}`
+              const isDead = !!deadPlants[key]
+              const isReplacing = replacing?.placement === p
+              return (
+                <div key={i} className={`placement-card ${isDead ? 'is-dead' : ''}`}>
+                  <div className="placement-header">
+                    <span className="placement-name">{isDead ? '☠️ ' : ''}{p.plant}</span>
+                    {p.quantity && <span className="badge">×{p.quantity}</span>}
+                  </div>
+                  {!isDead && (
+                    <dl className="placement-details">
+                      {p.location && <><dt>Location</dt><dd>{p.location}</dd></>}
+                      {p.spacing && <><dt>Spacing</dt><dd>{p.spacing}</dd></>}
+                      {p.sunlight && <><dt>Sunlight</dt><dd>{p.sunlight}</dd></>}
+                      {p.watering && <><dt>Watering</dt><dd>{p.watering}</dd></>}
+                      {p.notes && <><dt>Notes</dt><dd>{p.notes}</dd></>}
+                    </dl>
+                  )}
+                  <div className="placement-footer">
+                    <button
+                      className={isDead ? 'btn-secondary btn-sm' : 'btn-dead btn-sm'}
+                      onClick={() => { toggleDead(key); if (isDead) setReplacing(null) }}
+                    >
+                      {isDead ? '↩ Mark Alive' : '☠️ Mark as Dead'}
+                    </button>
+                    {isDead && (
+                      <button
+                        className="btn-primary btn-sm"
+                        onClick={() => setReplacing(isReplacing ? null : { placement: p, bed })}
+                      >
+                        🌱 {isReplacing ? 'Hide' : 'Get Replacement'}
+                      </button>
+                    )}
+                  </div>
+                  {isReplacing && (
+                    <ReplacementPanel
+                      placement={p}
+                      bed={bed}
+                      allPlacements={placements}
+                      onClose={() => setReplacing(null)}
+                    />
+                  )}
                 </div>
-                <dl className="placement-details">
-                  {p.location && <><dt>Location</dt><dd>{p.location}</dd></>}
-                  {p.spacing && <><dt>Spacing</dt><dd>{p.spacing}</dd></>}
-                  {p.sunlight && <><dt>Sunlight</dt><dd>{p.sunlight}</dd></>}
-                  {p.watering && <><dt>Watering</dt><dd>{p.watering}</dd></>}
-                  {p.notes && <><dt>Notes</dt><dd>{p.notes}</dd></>}
-                </dl>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       ))}

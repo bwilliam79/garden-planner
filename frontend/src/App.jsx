@@ -2,26 +2,39 @@ import { useState, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
 import BedsManager from './components/BedsManager.jsx'
 import PlantList from './components/PlantList.jsx'
-import GardenCanvas from './components/GardenCanvas.jsx'
+import GardenOverview from './components/GardenOverview.jsx'
 import PlanDisplay from './components/PlanDisplay.jsx'
 import TopBar from './components/TopBar.jsx'
 import './App.css'
 
-const DEFAULT_BED = { id: null, name: 'Bed 1', shape: 'rectangle', width: 10, height: 12, unit: 'feet' }
+const DEFAULT_BED = { id: 'default', name: 'Bed 1', shape: 'rectangle', width: 10, height: 12, unit: 'feet', x: 0, y: 0, rotation: 0 }
 
 const DEFAULT_STATE = {
-  beds: [{ ...DEFAULT_BED, id: 'default' }],
+  beds: [{ ...DEFAULT_BED }],
   plants: [],
   plan: null,
   placements: []
 }
 
-function migrateState(raw) {
-  // Migrate old single-garden saves to beds array
-  if (raw.garden && !raw.beds) {
-    return { ...DEFAULT_STATE, ...raw, beds: [{ ...raw.garden, id: raw.garden.id || uuid() }], garden: undefined }
+function migrateBed(bed, index) {
+  return {
+    x: index * (bed.width + 3),
+    y: 0,
+    rotation: 0,
+    ...bed,
   }
-  return { ...DEFAULT_STATE, ...raw }
+}
+
+function migrateState(raw) {
+  if (raw.garden && !raw.beds) {
+    const bed = migrateBed({ ...raw.garden, id: raw.garden.id || uuid() }, 0)
+    return { ...DEFAULT_STATE, ...raw, beds: [bed], garden: undefined }
+  }
+  return {
+    ...DEFAULT_STATE,
+    ...raw,
+    beds: (raw.beds || DEFAULT_STATE.beds).map(migrateBed)
+  }
 }
 
 export default function App() {
@@ -35,6 +48,9 @@ export default function App() {
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('layout')
+  const [savedPlans, setSavedPlans] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('garden-saved-plans') || '[]') } catch { return [] }
+  })
 
   const save = useCallback((updates) => {
     setState(prev => {
@@ -46,23 +62,24 @@ export default function App() {
 
   const activeBed = state.beds.find(b => b.id === activeBedId) ?? state.beds[0]
 
+  // Replace all beds (clears plan since shape/size changed)
   const updateBeds = (beds) => {
     save({ beds, plan: null, placements: [] })
-    // If active bed was removed, switch to first
-    if (!beds.find(b => b.id === activeBedId)) {
-      setActiveBedId(beds[0]?.id)
-    }
+    if (!beds.find(b => b.id === activeBedId)) setActiveBedId(beds[0]?.id)
   }
 
+  // Update one bed's position/rotation without clearing the plan
+  const moveBed = useCallback((id, updates) => {
+    setState(prev => {
+      const next = { ...prev, beds: prev.beds.map(b => b.id === id ? { ...b, ...updates } : b) }
+      localStorage.setItem('garden-planner-state', JSON.stringify(next))
+      return next
+    })
+  }, [])
+
   const generatePlan = async () => {
-    if (state.plants.length === 0) {
-      setError('Add at least one plant before generating a plan.')
-      return
-    }
-    if (state.beds.length === 0) {
-      setError('Add at least one garden bed before generating a plan.')
-      return
-    }
+    if (state.plants.length === 0) return setError('Add at least one plant before generating a plan.')
+    if (state.beds.length === 0) return setError('Add at least one garden bed before generating a plan.')
     setGenerating(true)
     setError(null)
     try {
@@ -81,6 +98,25 @@ export default function App() {
       setGenerating(false)
     }
   }
+
+  const savePlan = (name) => {
+    const entry = { id: uuid(), name, savedAt: Date.now(), state }
+    const next = [entry, ...savedPlans]
+    setSavedPlans(next)
+    localStorage.setItem('garden-saved-plans', JSON.stringify(next))
+  }
+
+  const loadPlan = (id) => {
+    const entry = savedPlans.find(p => p.id === id)
+    if (!entry) return
+    const data = migrateState(entry.state)
+    save(data)
+    setActiveBedId(data.beds[0]?.id)
+    setActiveTab('layout')
+  }
+
+  const clearPlants = () => save({ plants: [], plan: null, placements: [] })
+  const resetPlan = () => save({ plan: null, placements: [] })
 
   const exportData = () => {
     const name = state.beds[0]?.name ?? 'garden'
@@ -103,15 +139,11 @@ export default function App() {
         save(data)
         setActiveBedId(data.beds[0]?.id)
         setActiveTab('layout')
-      } catch {
-        setError('Invalid backup file.')
-      }
+      } catch { setError('Invalid backup file.') }
     }
     reader.readAsText(file)
     e.target.value = ''
   }
-
-  const activePlacements = state.placements?.filter(p => p.bedId === activeBed?.id) ?? []
 
   return (
     <div className="app">
@@ -122,15 +154,16 @@ export default function App() {
         onGenerate={generatePlan}
         generating={generating}
         hasPlants={state.plants.length > 0}
+        savedPlans={savedPlans}
+        onSavePlan={savePlan}
+        onLoadPlan={loadPlan}
+        onClearPlants={clearPlants}
+        onResetPlan={resetPlan}
       />
 
       <div className="app-tabs">
         {['layout', 'plants', 'plan'].map(tab => (
-          <button
-            key={tab}
-            className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
+          <button key={tab} className={`tab-btn ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
             {tab === 'layout' ? '🌱 Garden Beds' : tab === 'plants' ? '🪴 Plants' : '📋 Plan'}
             {tab === 'plan' && state.plan && <span className="badge" style={{ marginLeft: 6 }}>Ready</span>}
           </button>
@@ -152,15 +185,15 @@ export default function App() {
               activeBedId={activeBed?.id}
               onActivate={setActiveBedId}
               onChange={updateBeds}
+              onMoveBed={moveBed}
             />
-            {activeBed && (
-              <GardenCanvas
-                key={activeBed.id}
-                garden={activeBed}
-                placements={activePlacements}
-                plan={state.plan}
-              />
-            )}
+            <GardenOverview
+              beds={state.beds}
+              placements={state.placements}
+              activeBedId={activeBed?.id}
+              onActivate={setActiveBedId}
+              onMoveBed={moveBed}
+            />
           </div>
         )}
         {activeTab === 'plants' && (

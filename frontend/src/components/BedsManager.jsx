@@ -10,10 +10,10 @@ const SHAPES = [
 ]
 
 function newBed(n) {
-  return { id: uuid(), name: `Bed ${n}`, shape: 'rectangle', width: 10, height: 8, unit: 'feet' }
+  return { id: uuid(), name: `Bed ${n}`, shape: 'rectangle', width: 10, height: 8, unit: 'feet', x: (n - 1) * 13, y: 0, rotation: 0 }
 }
 
-export default function BedsManager({ beds, activeBedId, onActivate, onChange }) {
+export default function BedsManager({ beds, activeBedId, onActivate, onChange, onMoveBed }) {
   const [editing, setEditing] = useState(activeBedId)
 
   const activeBed = beds.find(b => b.id === editing) ?? beds[0]
@@ -163,6 +163,21 @@ export default function BedsManager({ beds, activeBedId, onActivate, onChange })
               )}
             </>
           )}
+
+          <div className="form-group">
+            <label>Orientation</label>
+            <div className="rotate-row">
+              <button type="button" className="btn-secondary rotate-btn"
+                onClick={() => onMoveBed(activeBed.id, { rotation: ((activeBed.rotation ?? 0) - 90 + 360) % 360 })}>
+                ↺ Rotate Left
+              </button>
+              <span className="rotate-deg">{activeBed.rotation ?? 0}°</span>
+              <button type="button" className="btn-secondary rotate-btn"
+                onClick={() => onMoveBed(activeBed.id, { rotation: ((activeBed.rotation ?? 0) + 90) % 360 })}>
+                ↻ Rotate Right
+              </button>
+            </div>
+          </div>
 
           <div className="garden-summary">{getSummary(activeBed)}</div>
         </div>

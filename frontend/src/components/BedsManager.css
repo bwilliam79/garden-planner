@@ -54,3 +54,7 @@
 
 .hint { font-size: 12px; color: var(--text-muted); }
 .btn-sm { padding: 5px 10px; font-size: 13px; }
+
+.rotate-row { display: flex; align-items: center; gap: 8px; }
+.rotate-btn { flex: 1; font-size: 13px; padding: 7px 10px; }
+.rotate-deg { min-width: 36px; text-align: center; font-size: 13px; color: var(--text-muted); font-weight: 600; }
