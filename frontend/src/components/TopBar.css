@@ -47,7 +47,7 @@
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  background: #fff;
+  background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: 0 4px 16px rgba(0,0,0,0.15);
@@ -104,3 +104,32 @@
 
 .dropdown-plan-row { display: flex; }
 .dropdown-plan-row .dropdown-item { flex: 1; }
+
+.settings-dropdown { min-width: 200px; }
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  gap: 12px;
+}
+
+.settings-label { font-size: 13px; color: var(--text); }
+
+.theme-toggle {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+
+.settings-version { padding-top: 6px; padding-bottom: 6px; }
+.version-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: monospace;
+}

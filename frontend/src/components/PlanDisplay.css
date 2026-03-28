@@ -223,6 +223,47 @@
 .replacement-reason { font-size: 12px; color: var(--text); line-height: 1.5; margin-bottom: 4px; }
 .replacement-meta { display: flex; gap: 10px; font-size: 11px; color: var(--text-muted); }
 
+.bed-map-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.bed-map-canvas {
+  width: 240px;
+  height: 240px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.bed-map-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+  padding-top: 4px;
+}
+
+.bed-map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+}
+
+.bed-map-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(0,0,0,0.15);
+}
+
 .companion-list, .tips-list {
   display: flex;
   flex-direction: column;

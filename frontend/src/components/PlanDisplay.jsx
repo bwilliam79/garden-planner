@@ -2,6 +2,31 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { draw, CANVAS_SIZE, PLANT_COLORS } from './GardenCanvas.jsx'
 import './PlanDisplay.css'
 
+function BedMap({ bed, placements }) {
+  const canvasRef = useRef(null)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    draw(canvas.getContext('2d'), bed, placements, null)
+  }, [bed, placements])
+
+  return (
+    <div className="bed-map-wrap">
+      <canvas ref={canvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} className="bed-map-canvas" />
+      {placements?.length > 0 && (
+        <div className="bed-map-legend">
+          {placements.map((p, i) => (
+            <div key={i} className="bed-map-legend-item">
+              <span className="bed-map-dot" style={{ background: PLANT_COLORS[i % PLANT_COLORS.length] }} />
+              <span>{p.plant}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ReplacementPanel({ placement, bed, allPlacements, onClose }) {
   const [loading, setLoading] = useState(false)
   const [replacements, setReplacements] = useState(null)
@@ -188,6 +213,7 @@ export default function PlanDisplay({ plan, placements, beds, onGenerate, genera
       {byBed.map(({ bed, placements: bp }) => bp.length > 0 && (
         <div key={bed.id} className="card">
           <div className="section-title">📍 {bed.name} — Plant Placements</div>
+          <BedMap bed={bed} placements={bp} />
           <div className="placements-grid">
             {bp.map((p, i) => {
               const key = `${bed.id}-${p.plant}`

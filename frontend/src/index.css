@@ -26,6 +26,20 @@
   --shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+[data-theme="dark"] {
+  --green-dark: #52b788;
+  --green-mid: #3a8a6a;
+  --green-light: #1a3a2a;
+  --brown: #a0714a;
+  --brown-light: #2e1e0e;
+  --text: #e2e2e2;
+  --text-muted: #999;
+  --border: #3a3a3a;
+  --bg: #121212;
+  --white: #1e1e1e;
+  --shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);

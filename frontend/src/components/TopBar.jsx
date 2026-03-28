@@ -1,5 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './TopBar.css'
+
+const APP_VERSION = '1.0.0'
+
+function useTheme() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('garden-theme') || 'light')
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('garden-theme', theme)
+  }, [theme])
+  const toggle = () => setTheme(t => t === 'light' ? 'dark' : 'light')
+  return [theme, toggle]
+}
 
 export default function TopBar({
   gardenName, onExport, onImport, onGenerate, generating, hasPlants,
@@ -8,6 +20,8 @@ export default function TopBar({
   const [showMenu, setShowMenu] = useState(false)
   const [showSaveInput, setShowSaveInput] = useState(false)
   const [saveName, setSaveName] = useState('')
+  const [showSettings, setShowSettings] = useState(false)
+  const [theme, toggleTheme] = useTheme()
 
   const handleSave = () => {
     if (!saveName.trim()) return
@@ -92,9 +106,32 @@ export default function TopBar({
         >
           {generating ? '⏳ Generating…' : '✨ Generate Plan'}
         </button>
+
+        {/* Settings menu */}
+        <div className="topbar-menu-wrap">
+          <button className="btn btn-secondary" onClick={() => { setShowSettings(s => !s); setShowMenu(false) }} title="Settings">
+            ⚙️
+          </button>
+          {showSettings && (
+            <div className="topbar-dropdown settings-dropdown">
+              <div className="dropdown-section-label">Appearance</div>
+              <div className="settings-row">
+                <span className="settings-label">{theme === 'dark' ? '🌙 Dark mode' : '☀️ Light mode'}</span>
+                <button className="theme-toggle" onClick={toggleTheme}>
+                  {theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+                </button>
+              </div>
+              <div className="dropdown-divider" />
+              <div className="settings-row settings-version">
+                <span className="settings-label">Version</span>
+                <span className="version-badge">v{APP_VERSION}</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {showMenu && <div className="topbar-overlay" onClick={() => setShowMenu(false)} />}
+      {(showMenu || showSettings) && <div className="topbar-overlay" onClick={() => { setShowMenu(false); setShowSettings(false) }} />}
     </header>
   )
 }
