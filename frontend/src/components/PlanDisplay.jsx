@@ -1,4 +1,74 @@
+import { useRef, useEffect, useState } from 'react'
+import { draw, CANVAS_SIZE, PLANT_COLORS } from './GardenCanvas.jsx'
 import './PlanDisplay.css'
+
+function PrintLayout({ garden, placements, plan }) {
+  const canvasRef = useRef(null)
+  const [dataUrl, setDataUrl] = useState(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    draw(ctx, garden, placements, plan)
+    setDataUrl(canvas.toDataURL('image/png'))
+  }, [garden, placements, plan])
+
+  return (
+    <div className="print-layout">
+      {/* Hidden canvas used only to generate the image */}
+      <canvas ref={canvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} style={{ display: 'none' }} />
+
+      <div className="print-layout-inner">
+        {dataUrl && (
+          <div className="print-map">
+            <img src={dataUrl} alt="Garden layout" className="print-map-img" />
+            {placements?.length > 0 && (
+              <div className="print-legend">
+                {placements.map((p, i) => (
+                  <div key={i} className="print-legend-item">
+                    <span className="print-legend-dot" style={{ background: PLANT_COLORS[i % PLANT_COLORS.length] }} />
+                    <span>{p.plant}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {placements?.length > 0 && (
+          <div className="print-placements">
+            <table className="print-placement-table">
+              <thead>
+                <tr>
+                  <th>Plant</th>
+                  <th>Qty</th>
+                  <th>Location</th>
+                  <th>Spacing</th>
+                  <th>Watering</th>
+                </tr>
+              </thead>
+              <tbody>
+                {placements.map((p, i) => (
+                  <tr key={i}>
+                    <td>
+                      <span className="print-legend-dot" style={{ background: PLANT_COLORS[i % PLANT_COLORS.length] }} />
+                      {p.plant}
+                    </td>
+                    <td>{p.quantity ?? '—'}</td>
+                    <td>{p.location ?? '—'}</td>
+                    <td>{p.spacing ?? '—'}</td>
+                    <td>{p.watering ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function PlanDisplay({ plan, placements, garden, onGenerate, generating }) {
   if (!plan) {
@@ -32,6 +102,9 @@ export default function PlanDisplay({ plan, placements, garden, onGenerate, gene
           </button>
         </div>
       </div>
+
+      {/* Print-only layout map — hidden on screen, visible when printing */}
+      <PrintLayout garden={garden} placements={placements} plan={plan} />
 
       {plan.overview && (
         <div className="card plan-overview">

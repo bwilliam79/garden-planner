@@ -64,6 +64,78 @@
 .schedule-table th { background: var(--green-light); color: var(--green-dark); font-weight: 600; }
 .schedule-table tr:last-child td { border-bottom: none; }
 
+/* Print layout — hidden on screen, shown when printing */
+.print-layout { display: none; }
+
+.print-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+  flex-shrink: 0;
+}
+
+@media print {
+  .print-layout {
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .print-layout-inner {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .print-map { display: flex; flex-direction: column; gap: 8px; }
+
+  .print-map-img {
+    width: 280px;
+    height: 280px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .print-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 11px;
+  }
+
+  .print-legend-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .print-placements { overflow: visible; }
+
+  .print-placement-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  .print-placement-table th,
+  .print-placement-table td {
+    padding: 5px 8px;
+    text-align: left;
+    border: 1px solid #ccc;
+    vertical-align: top;
+  }
+
+  .print-placement-table th {
+    background: #e8f5e9;
+    font-weight: 600;
+  }
+
+  .print-placement-table td:first-child {
+    white-space: nowrap;
+  }
+}
+
 .companion-list, .tips-list {
   display: flex;
   flex-direction: column;

@@ -1,11 +1,11 @@
 import { useRef, useEffect } from 'react'
 import './GardenCanvas.css'
 
-const CANVAS_SIZE = 560
+export const CANVAS_SIZE = 560
 const PADDING = 30
 
 // Map a colour name/string to a pastel for plant dots
-const PLANT_COLORS = [
+export const PLANT_COLORS = [
   '#e63946','#f4a261','#2a9d8f','#e9c46a','#264653',
   '#6a4c93','#1982c4','#8ac926','#ff595e','#6a994e'
 ]
@@ -38,7 +38,7 @@ export default function GardenCanvas({ garden, placements, plan }) {
   )
 }
 
-function draw(ctx, garden, placements, plan) {
+export function draw(ctx, garden, placements, plan) {
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE)
 
   const { shape, width, height, unit, notchW, notchH } = garden
