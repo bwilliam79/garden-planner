@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import { draw, CANVAS_SIZE, PLANT_COLORS } from './GardenCanvas.jsx'
 import './PlanDisplay.css'
 
-function PrintLayout({ garden, placements, plan }) {
+function PrintBed({ bed, placements, plan, colorOffset }) {
   const canvasRef = useRef(null)
   const [dataUrl, setDataUrl] = useState(null)
 
@@ -10,24 +10,23 @@ function PrintLayout({ garden, placements, plan }) {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
-    draw(ctx, garden, placements, plan)
+    draw(ctx, bed, placements, plan)
     setDataUrl(canvas.toDataURL('image/png'))
-  }, [garden, placements, plan])
+  }, [bed, placements, plan])
 
   return (
-    <div className="print-layout">
-      {/* Hidden canvas used only to generate the image */}
+    <div className="print-bed">
       <canvas ref={canvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} style={{ display: 'none' }} />
-
+      <h3 className="print-bed-title">{bed.name}</h3>
       <div className="print-layout-inner">
         {dataUrl && (
           <div className="print-map">
-            <img src={dataUrl} alt="Garden layout" className="print-map-img" />
+            <img src={dataUrl} alt={bed.name} className="print-map-img" />
             {placements?.length > 0 && (
               <div className="print-legend">
                 {placements.map((p, i) => (
                   <div key={i} className="print-legend-item">
-                    <span className="print-legend-dot" style={{ background: PLANT_COLORS[i % PLANT_COLORS.length] }} />
+                    <span className="print-legend-dot" style={{ background: PLANT_COLORS[(colorOffset + i) % PLANT_COLORS.length] }} />
                     <span>{p.plant}</span>
                   </div>
                 ))}
@@ -35,24 +34,17 @@ function PrintLayout({ garden, placements, plan }) {
             )}
           </div>
         )}
-
         {placements?.length > 0 && (
           <div className="print-placements">
             <table className="print-placement-table">
               <thead>
-                <tr>
-                  <th>Plant</th>
-                  <th>Qty</th>
-                  <th>Location</th>
-                  <th>Spacing</th>
-                  <th>Watering</th>
-                </tr>
+                <tr><th>Plant</th><th>Qty</th><th>Location</th><th>Spacing</th><th>Watering</th></tr>
               </thead>
               <tbody>
                 {placements.map((p, i) => (
                   <tr key={i}>
                     <td>
-                      <span className="print-legend-dot" style={{ background: PLANT_COLORS[i % PLANT_COLORS.length] }} />
+                      <span className="print-legend-dot" style={{ background: PLANT_COLORS[(colorOffset + i) % PLANT_COLORS.length] }} />
                       {p.plant}
                     </td>
                     <td>{p.quantity ?? '—'}</td>
@@ -70,13 +62,13 @@ function PrintLayout({ garden, placements, plan }) {
   )
 }
 
-export default function PlanDisplay({ plan, placements, garden, onGenerate, generating }) {
+export default function PlanDisplay({ plan, placements, beds, onGenerate, generating }) {
   if (!plan) {
     return (
       <div className="card plan-empty">
         <span className="plan-empty-icon">🌱</span>
         <h2>No Plan Generated Yet</h2>
-        <p>Set up your garden layout, add your plants, then click <strong>Generate Plan</strong> to get AI-powered planting recommendations.</p>
+        <p>Set up your garden beds, add your plants, then click <strong>Generate Plan</strong> to get AI-powered planting recommendations.</p>
         <button className="btn-primary" onClick={onGenerate} disabled={generating}>
           {generating ? '⏳ Generating…' : '✨ Generate Plan'}
         </button>
@@ -84,14 +76,23 @@ export default function PlanDisplay({ plan, placements, garden, onGenerate, gene
     )
   }
 
+  // Group placements by bed
+  const byBed = (beds ?? []).map(bed => ({
+    bed,
+    placements: (placements ?? []).filter(p => p.bedId === bed.id)
+  }))
+
+  // Flat list for on-screen display (all beds together)
+  const allPlacements = placements ?? []
+
+  const bedLabel = beds?.length === 1 ? beds[0].name : `${beds?.length} Beds`
+
   return (
     <div className="plan-page">
       <div className="plan-header card">
         <div>
-          <h2>🌻 Garden Plan — {garden.name}</h2>
-          <p className="plan-meta">
-            {garden.shape} · {garden.width}{garden.shape !== 'circle' && garden.shape !== 'square' ? ` × ${garden.height}` : ''} {garden.unit}
-          </p>
+          <h2>🌻 Garden Plan — {bedLabel}</h2>
+          <p className="plan-meta">{beds?.map(b => b.name).join(' · ')}</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn-secondary" onClick={() => window.print()}>
@@ -103,8 +104,21 @@ export default function PlanDisplay({ plan, placements, garden, onGenerate, gene
         </div>
       </div>
 
-      {/* Print-only layout map — hidden on screen, visible when printing */}
-      <PrintLayout garden={garden} placements={placements} plan={plan} />
+      {/* Print-only: one section per bed */}
+      <div className="print-all-beds">
+        {byBed.map(({ bed, placements: bp }, bedIdx) => {
+          const colorOffset = byBed.slice(0, bedIdx).reduce((sum, { placements: p }) => sum + p.length, 0)
+          return (
+            <PrintBed
+              key={bed.id}
+              bed={bed}
+              placements={bp}
+              plan={plan}
+              colorOffset={colorOffset}
+            />
+          )
+        })}
+      </div>
 
       {plan.overview && (
         <div className="card plan-overview">
@@ -113,11 +127,12 @@ export default function PlanDisplay({ plan, placements, garden, onGenerate, gene
         </div>
       )}
 
-      {placements?.length > 0 && (
-        <div className="card">
-          <div className="section-title">Plant Placements</div>
+      {/* On-screen: group placements by bed */}
+      {byBed.map(({ bed, placements: bp }) => bp.length > 0 && (
+        <div key={bed.id} className="card">
+          <div className="section-title">📍 {bed.name} — Plant Placements</div>
           <div className="placements-grid">
-            {placements.map((p, i) => (
+            {bp.map((p, i) => (
               <div key={i} className="placement-card">
                 <div className="placement-header">
                   <span className="placement-name">{p.plant}</span>
@@ -134,7 +149,7 @@ export default function PlanDisplay({ plan, placements, garden, onGenerate, gene
             ))}
           </div>
         </div>
-      )}
+      ))}
 
       {plan.wateringSchedule?.length > 0 && (
         <div className="card">

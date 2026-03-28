@@ -22,7 +22,7 @@ export default function GardenCanvas({ garden, placements, plan }) {
 
   return (
     <div className="card canvas-wrapper">
-      <div className="section-title">Garden Preview</div>
+      <div className="section-title">{garden.name} — Preview</div>
       <canvas ref={canvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} className="garden-canvas" />
       {placements?.length > 0 && (
         <div className="canvas-legend">
