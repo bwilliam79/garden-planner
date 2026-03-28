@@ -23,9 +23,14 @@ export default function PlanDisplay({ plan, placements, garden, onGenerate, gene
             {garden.shape} · {garden.width}{garden.shape !== 'circle' && garden.shape !== 'square' ? ` × ${garden.height}` : ''} {garden.unit}
           </p>
         </div>
-        <button className="btn-secondary" onClick={onGenerate} disabled={generating}>
-          {generating ? '⏳ Regenerating…' : '🔄 Regenerate'}
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn-secondary" onClick={() => window.print()}>
+            🖨️ Print
+          </button>
+          <button className="btn-secondary" onClick={onGenerate} disabled={generating}>
+            {generating ? '⏳ Regenerating…' : '🔄 Regenerate'}
+          </button>
+        </div>
       </div>
 
       {plan.overview && (

@@ -1,5 +1,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+@media print {
+  .topbar, .app-tabs, .error-banner,
+  .plan-header button, .topbar-actions { display: none !important; }
+  .app-body { padding: 0; }
+  .plan-page { gap: 12px; }
+  .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+  .placements-grid { grid-template-columns: repeat(2, 1fr); }
+  body { background: #fff; }
+}
+
 :root {
   --green-dark: #2d6a4f;
   --green-mid: #52b788;
