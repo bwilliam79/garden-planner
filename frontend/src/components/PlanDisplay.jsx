@@ -41,9 +41,12 @@ function ReplacementPanel({ placement, bed, allPlacements, onClose }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ deadPlant: placement, bed, allPlacements })
       })
-      if (!res.ok) throw new Error(await res.text())
-      const data = await res.json()
-      setReplacements(data.replacements)
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ error: 'Failed to get recommendations.' }))
+        throw new Error(body.error || 'Failed to get recommendations.')
+      }
+      const data = await res.json().catch(() => ({ replacements: [] }))
+      setReplacements(data.replacements || [])
     } catch (e) {
       setError(e.message || 'Failed to get recommendations.')
     } finally {
@@ -51,7 +54,7 @@ function ReplacementPanel({ placement, bed, allPlacements, onClose }) {
     }
   }, [placement, bed, allPlacements])
 
-  useEffect(() => { fetch_() }, [])
+  useEffect(() => { fetch_() }, [fetch_])
 
   return (
     <div className="replacement-panel">

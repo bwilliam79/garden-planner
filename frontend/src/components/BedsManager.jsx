@@ -148,13 +148,13 @@ export default function BedsManager({ beds, activeBedId, onActivate, onChange, o
                   <div className="form-row">
                     <div className="form-group">
                       <label>Notch Width ({activeBed.unit})</label>
-                      <input type="number" min="1" max={activeBed.width - 1}
+                      <input type="number" min="1" max={Math.max(1, activeBed.width - 1)}
                         value={activeBed.notchW ?? Math.floor(activeBed.width / 2)}
                         onChange={e => updateBed('notchW', Number(e.target.value))} />
                     </div>
                     <div className="form-group">
                       <label>Notch Height ({activeBed.unit})</label>
-                      <input type="number" min="1" max={activeBed.height - 1}
+                      <input type="number" min="1" max={Math.max(1, activeBed.height - 1)}
                         value={activeBed.notchH ?? Math.floor(activeBed.height / 2)}
                         onChange={e => updateBed('notchH', Number(e.target.value))} />
                     </div>
