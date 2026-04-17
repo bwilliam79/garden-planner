@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 import BedsManager from './components/BedsManager.jsx'
 import PlantList from './components/PlantList.jsx'
@@ -77,6 +77,40 @@ export default function App() {
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('layout')
   const [savedPlans, setSavedPlans] = useState(loadSavedPlans)
+
+  // Server-side persistence: load once on mount (server wins over localStorage),
+  // then debounce-sync on every state/savedPlans change.
+  const serverLoaded = useRef(false)
+  const syncTimer = useRef(null)
+
+  useEffect(() => {
+    fetch('/api/storage/state')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return
+        if (data.state && isValidStateShape(data.state)) {
+          const migrated = migrateState(data.state)
+          setState(migrated)
+          setActiveBedId(migrated.beds[0]?.id)
+        }
+        if (Array.isArray(data.savedPlans)) setSavedPlans(data.savedPlans)
+      })
+      .catch(() => {})
+      .finally(() => { serverLoaded.current = true })
+  }, [])
+
+  useEffect(() => {
+    if (!serverLoaded.current) return
+    clearTimeout(syncTimer.current)
+    syncTimer.current = setTimeout(() => {
+      fetch('/api/storage/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state, savedPlans }),
+      }).catch(() => {})
+    }, 800)
+    return () => clearTimeout(syncTimer.current)
+  }, [state, savedPlans])
 
   const persist = useCallback((key, value) => {
     try {

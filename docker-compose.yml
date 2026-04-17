@@ -5,6 +5,9 @@ services:
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - PORT=3001
+      - DATA_DIR=/data
+    volumes:
+      - ./data:/data
     networks:
       - garden-net
 

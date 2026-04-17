@@ -3,6 +3,7 @@ import cors from 'cors'
 import rateLimit from 'express-rate-limit'
 import { planRoute } from './routes/plan.js'
 import { replaceRoute } from './routes/replace.js'
+import { storageRoute } from './routes/storage.js'
 import { assertAnthropicKey } from './lib/llm.js'
 
 // Fail fast if required env is missing.
@@ -52,6 +53,9 @@ app.use('/api/plan', llmLimiter, planRoute)
 
 // Plant replacement recommendations
 app.use('/api/replace', llmLimiter, replaceRoute)
+
+// Persistent state storage — larger JSON limit for saved plans/state payloads.
+app.use('/api/storage', express.json({ limit: '2mb' }), storageRoute)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Garden Planner API running on port ${PORT}`))
