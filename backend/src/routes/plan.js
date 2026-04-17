@@ -102,7 +102,7 @@ For each placement, x and y are positions in feet from the top-left corner of th
 
   try {
     const message = await client.messages.create({
-      model: 'claude-opus-4-6',
+      model: 'claude-opus-4-7',
       max_tokens: 4096,
       messages: [{ role: 'user', content: prompt }],
     })

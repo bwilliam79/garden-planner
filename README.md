@@ -92,6 +92,6 @@ npm run dev
 
 ## Tech Stack
 
-- **Backend**: Node.js 20, Express, Anthropic SDK (`claude-opus-4-6`)
+- **Backend**: Node.js 20, Express, Anthropic SDK (`claude-opus-4-7`)
 - **Frontend**: React 18, Vite, Konva (canvas rendering)
 - **Deployment**: Docker Compose, Nginx (frontend static serving + API proxy)
